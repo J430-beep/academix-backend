@@ -15,28 +15,34 @@ const RATE_LIMIT_TIME = 60;
 // ===============================
 // EMAIL SETUP
 // ===============================
-const transporter = nodemailer.createTransport({
+console.log("EMAIL CONFIG CHECK");
+console.log("EMAIL USER:", process.env.EMAIL_USER);
 
-    host: "smtp.gmail.com",
+try {
 
-    port: 587,
+    await transporter.verify();
 
-    secure: false,
+    console.log("SMTP CONNECTION OK");
 
-    family: 4,
+    const info = await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "AcademiX OTP Code",
+        text: `Your OTP code is: ${otp}`
+    });
 
-    auth:{
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
+    console.log("EMAIL SENT:", info.messageId);
 
-    connectionTimeout: 30000,
+} catch(emailError){
 
-    greetingTimeout: 30000,
+    console.error("EMAIL ERROR FULL:");
+    console.error(emailError);
 
-    socketTimeout: 30000
-
-});
+    return res.status(500).json({
+        error: "Email failed",
+        details: emailError.message
+    });
+}
 
 
 
